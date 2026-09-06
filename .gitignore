@@ -1,0 +1,13 @@
+# 로컬 사용량 캐시 — 파일 경로와 토큰 사용 기록이 들어 있어 커밋하지 않는다
+cache.json
+limits-cache.json
+*.tmp
+
+# 빌드 산출물
+build/
+*.icns
+*.iconset/
+
+__pycache__/
+*.pyc
+.DS_Store
