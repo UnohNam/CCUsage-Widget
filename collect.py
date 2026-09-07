@@ -11,7 +11,10 @@ from datetime import datetime, timezone, timedelta
 
 HOME = os.path.expanduser("~")
 PROJECTS = os.path.join(HOME, ".claude", "projects")
-CACHE = os.path.join(HOME, ".claude", "widgets", "ccusage", "cache.json")
+# 캐시는 macOS 관례대로 ~/Library/Caches 아래에 둔다. 소스 트리와 분리해야
+# 저장소를 어디로 옮기든 동작하고, 캐시가 소스처럼 보이지 않는다.
+CACHE_DIR = os.path.join(HOME, "Library", "Caches", "CCUsage")
+CACHE = os.path.join(CACHE_DIR, "usage-cache.json")
 RETAIN_DAYS = 45          # 캐시에 남겨둘 기간
 BLOCK_HOURS = 5           # Claude 사용 한도 블록 길이
 

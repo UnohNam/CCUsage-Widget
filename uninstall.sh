@@ -7,4 +7,5 @@ rm -rf /Applications/CCUsage.app
 rm -rf ~/Library/Group\ Containers/group.local.ccusage
 rm -rf ~/Library/Containers/local.ccusage.app.widget
 defaults delete local.ccusage.app 2>/dev/null
-echo "제거 완료 (소스는 ~/.claude/widgets/ccusage 에 남습니다)"
+rm -rf ~/Library/Caches/CCUsage
+echo "제거 완료 (소스는 저장소에 남습니다)"

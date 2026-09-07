@@ -94,3 +94,4 @@ src/makeicon.swift  앱 아이콘 생성
 - 단가표는 `collect.py` 의 `PRICES` 에 있습니다.
 - 한도 조회 주기는 `limits.py` 의 `TTL`(기본 300초).
 - 집계 보관 기간은 `collect.py` 의 `RETAIN_DAYS`(기본 45일).
+- 캐시는 `~/Library/Caches/CCUsage/` 에 쌓입니다. 지워도 다음 실행 때 다시 만듭니다.

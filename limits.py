@@ -7,7 +7,8 @@
 import json, os, re, subprocess, time
 from datetime import datetime
 
-CACHE = os.path.expanduser("~/.claude/widgets/ccusage/limits-cache.json")
+CACHE_DIR = os.path.expanduser("~/Library/Caches/CCUsage")
+CACHE = os.path.join(CACHE_DIR, "limits-cache.json")
 TTL = 300          # 5분
 TIMEOUT = 25
 
