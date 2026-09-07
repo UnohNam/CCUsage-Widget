@@ -192,3 +192,24 @@ else
   echo "⚠️  위젯이 아직 등록되지 않았습니다. 앱을 한 번 실행한 뒤 다시 확인하세요."
 fi
 echo "빌드 완료: $APP"
+
+# ── 로그인 항목 등록 ─────────────────────────────────────────
+# 위젯은 앱이 살아 있는 동안에만 갱신된다(앱이 60초마다 집계 → 스냅샷 → 타임라인 리로드).
+# 앱이 종료되면 위젯은 마지막 스냅샷을 그대로 붙들고 있으므로, 로그인 시 자동 실행하고
+# KeepAlive 로 죽으면 되살린다.
+echo "▸ 로그인 항목 등록"
+AGENT=~/Library/LaunchAgents/local.ccusage.widget.plist
+cat > "$AGENT" <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>local.ccusage.widget</string>
+  <key>ProgramArguments</key><array><string>/Applications/CCUsage.app/Contents/MacOS/CCUsage</string></array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>ThrottleInterval</key><integer>10</integer>
+</dict></plist>
+PLIST
+launchctl bootout "gui/$(id -u)/local.ccusage.widget" 2>/dev/null || true
+launchctl bootstrap "gui/$(id -u)" "$AGENT" 2>/dev/null || true
+launchctl kickstart -k "gui/$(id -u)/local.ccusage.widget" 2>/dev/null || true

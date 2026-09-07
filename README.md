@@ -44,10 +44,20 @@ App Group 컨테이너에 스냅샷을 쓰고, 위젯은 그 스냅샷만 읽습
 
 ```sh
 ./build.sh
-open -a /Applications/CCUsage.app
 ```
 
 바탕화면 우클릭 → **위젯 편집…** → `CCUsage` 검색 → 원하는 크기를 끌어다 놓습니다.
+
+빌드가 로그인 항목(`~/Library/LaunchAgents/local.ccusage.widget.plist`)을 등록하고 앱을
+바로 띄웁니다. **위젯은 이 앱이 떠 있는 동안에만 갱신됩니다** — 앱이 60초마다 집계해서
+스냅샷을 쓰고 타임라인을 리로드하기 때문입니다. 앱이 죽으면 위젯은 마지막 숫자를 그대로
+붙들고 있으므로, `KeepAlive` 로 launchd 가 되살리게 해 두었습니다.
+
+멈췄다 싶으면:
+
+```sh
+launchctl kickstart -k gui/$(id -u)/local.ccusage.widget
+```
 
 제거는 `./uninstall.sh`.
 
@@ -61,6 +71,7 @@ open -a /Applications/CCUsage.app
 4. 아이콘 생성, 스크립트를 번들 Resources 에 복사
 5. 안쪽(확장) → 바깥(앱) 순서로 서명
 6. LaunchServices / PlugInKit 에 등록
+7. 로그인 항목(LaunchAgent) 등록 후 앱 실행
 
 ### 직접 조립할 때 걸렸던 것들
 
