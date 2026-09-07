@@ -4,7 +4,7 @@
 `claude -p "/usage"` 출력을 파싱한다. 한도 값은 서버가 주는 것이라
 ~/.claude/projects 의 JSONL 에는 없다. 호출에 약 4초 걸리므로 TTL 캐시를 둔다.
 """
-import json, os, re, subprocess, time
+import json, os, re, shutil, subprocess, time
 from datetime import datetime
 
 CACHE_DIR = os.path.expanduser("~/Library/Caches/CCUsage")
@@ -74,13 +74,28 @@ def load_cache():
         return None
 
 
+def claude_bin():
+    """`claude` 실행 파일 경로.
+
+    launchd 로 띄운 앱의 PATH 는 /usr/bin:/bin:/usr/sbin:/sbin 뿐이라
+    로그인 셸의 PATH 에만 있는 claude 를 찾지 못한다. 흔한 설치 위치를
+    직접 뒤진 뒤, 없으면 PATH 검색에 맡긴다.
+    """
+    for c in (os.path.expanduser("~/.local/bin/claude"),
+              "/opt/homebrew/bin/claude",
+              "/usr/local/bin/claude"):
+        if os.path.isfile(c) and os.access(c, os.X_OK):
+            return c
+    return shutil.which("claude") or "claude"
+
+
 def fetch(force=False):
     cached = load_cache()
     if not force and cached and time.time() - cached.get("fetched", 0) < TTL:
         return cached
 
     try:
-        p = subprocess.run(["claude", "-p", "/usage"],
+        p = subprocess.run([claude_bin(), "-p", "/usage"],
                            capture_output=True, text=True, timeout=TIMEOUT,
                            cwd=os.path.expanduser("~"))
         limits = parse(p.stdout)

@@ -52,7 +52,11 @@ fi
 OSBUILD=$(sw_vers -buildVersion)
 
 echo "▸ 기존 번들 정리"
+# KeepAlive 가 걸려 있으면 pkill 로는 곧바로 되살아나 서명이 "Operation not permitted" 로
+# 실패한다. 에이전트를 내렸다가 마지막에 다시 올린다.
+launchctl bootout "gui/$(id -u)/local.ccusage.widget" 2>/dev/null || true
 pkill -x CCUsage 2>/dev/null || true
+pkill -f "CCUsageWidget.appex/Contents/MacOS/CCUsageWidget" 2>/dev/null || true
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$AX/Contents/MacOS"
 
@@ -182,6 +186,11 @@ codesign --force -s "$IDENTITY" --options runtime --entitlements /tmp/ccusage-ap
 echo "▸ LaunchServices / PlugInKit 등록"
 LSREG=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 "$LSREG" -f "$APP"
+# 이미 떠 있는 익스텐션 프로세스는 옛 번들을 물고 있다. 그대로 두면 WidgetKit 아카이버가
+# "Bundle version did not match" 로 타임라인 저장을 거부해서 — 익스텐션은 매번 정상적으로
+# 타임라인을 돌려주는데도 — 위젯 화면이 옛 값에 그대로 얼어붙는다. chronod 가 새 번들로
+# 다시 띄우도록 여기서 정리한다.
+pkill -f "CCUsageWidget.appex/Contents/MacOS/CCUsageWidget" 2>/dev/null || true
 pluginkit -e use -i local.ccusage.app.widget 2>/dev/null || true
 pluginkit -a "$AX" 2>/dev/null || true
 sleep 1
@@ -199,7 +208,7 @@ echo "빌드 완료: $APP"
 # KeepAlive 로 죽으면 되살린다.
 echo "▸ 로그인 항목 등록"
 AGENT=~/Library/LaunchAgents/local.ccusage.widget.plist
-cat > "$AGENT" <<'PLIST'
+cat > "$AGENT" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
@@ -208,6 +217,10 @@ cat > "$AGENT" <<'PLIST'
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
   <key>ThrottleInterval</key><integer>10</integer>
+  <!-- launchd 기본 PATH 에는 ~/.local/bin 이 없어 claude CLI 를 못 찾는다. -->
+  <key>EnvironmentVariables</key><dict>
+    <key>PATH</key><string>$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
 </dict></plist>
 PLIST
 launchctl bootout "gui/$(id -u)/local.ccusage.widget" 2>/dev/null || true

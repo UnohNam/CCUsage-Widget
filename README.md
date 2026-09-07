@@ -59,6 +59,13 @@ App Group 컨테이너에 스냅샷을 쓰고, 위젯은 그 스냅샷만 읽습
 launchctl kickstart -k gui/$(id -u)/local.ccusage.widget
 ```
 
+숫자가 한참 옛날 값에 얼어붙어 있으면 익스텐션 프로세스가 옛 번들을 물고 있는 것입니다.
+`./build.sh` 가 매번 정리하지만, 수동으로는:
+
+```sh
+pkill -f CCUsageWidget.appex
+```
+
 제거는 `./uninstall.sh`.
 
 ## 빌드가 하는 일
